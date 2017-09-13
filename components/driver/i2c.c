@@ -468,20 +468,20 @@ esp_err_t i2c_param_config(i2c_port_t i2c_num, const i2c_config_t* i2c_conf)
         I2C[i2c_num]->ctr.trans_start = 0;
     } else {
         I2C[i2c_num]->fifo_conf.nonfifo_en = 0;
+		//set frequency
+		int half_cycle = ( I2C_APB_CLK_FREQ / i2c_conf->master.clk_speed ) / 2;
+		I2C[i2c_num]->scl_low_period.period = half_cycle - 1;
+		I2C[i2c_num]->scl_high_period.period = ( I2C_APB_CLK_FREQ / i2c_conf->master.clk_speed ) - half_cycle - 1;
+		//set timing for start signal
+		I2C[i2c_num]->scl_start_hold.time = half_cycle;
+		I2C[i2c_num]->scl_rstart_setup.time = half_cycle;
+		//set timing for stop signal
+		I2C[i2c_num]->scl_stop_hold.time = half_cycle;
+		I2C[i2c_num]->scl_stop_setup.time = half_cycle;
+		//set timing for data
+		I2C[i2c_num]->sda_hold.time = half_cycle / 2;
+		I2C[i2c_num]->sda_sample.time = half_cycle / 2;
     }
-    //set frequency
-    int half_cycle = ( I2C_APB_CLK_FREQ / i2c_conf->master.clk_speed ) / 2;
-    I2C[i2c_num]->scl_low_period.period = half_cycle - 1;
-    I2C[i2c_num]->scl_high_period.period = ( I2C_APB_CLK_FREQ / i2c_conf->master.clk_speed ) - half_cycle - 1;
-    //set timing for start signal
-    I2C[i2c_num]->scl_start_hold.time = half_cycle;
-    I2C[i2c_num]->scl_rstart_setup.time = half_cycle;
-    //set timing for stop signal
-    I2C[i2c_num]->scl_stop_hold.time = half_cycle;
-    I2C[i2c_num]->scl_stop_setup.time = half_cycle;
-    //set timing for data
-    I2C[i2c_num]->sda_hold.time = half_cycle / 2;
-    I2C[i2c_num]->sda_sample.time = half_cycle / 2;
     //set timeout of receving data
     I2C[i2c_num]->timeout.tout = 200000;
     I2C_EXIT_CRITICAL(&i2c_spinlock[i2c_num]);
